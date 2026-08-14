@@ -10,6 +10,10 @@ public class PlayerController : MonoBehaviour
     public float airAcceleration = 55f;
     public float airDeceleration = 40f;
 
+    [Header("Sprint")]
+    public float sprintMultiplier = 1.5f;
+    public float sprintAcceleration = 120f;
+
     [Header("Jump")]
     public float jumpForce = 15f;
     [Range(0f, 1f)]
@@ -36,8 +40,9 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool isWallSliding;
     private bool isHanging;
-    private int hangDirection; // 1 = right wall, -1 = left wall
+    private int hangDirection;
     private float moveInput;
+    private bool isSprinting;
     private float defaultGravityScale;
     private float grabCooldownTimer;
 
@@ -51,6 +56,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         moveInput = Input.GetAxisRaw("Horizontal");
+        isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         // Tick grab cooldown
         if (grabCooldownTimer > 0f)
@@ -130,10 +136,18 @@ public class PlayerController : MonoBehaviour
         else
         {
             // --- Horizontal acceleration / deceleration via velocity smoothing ---
-            float targetSpeed = moveInput * maxMoveSpeed;
-            float accelRate = isGrounded
-                ? (Mathf.Abs(targetSpeed) > 0.01f ? groundAcceleration : groundDeceleration)
-                : (Mathf.Abs(targetSpeed) > 0.01f ? airAcceleration : airDeceleration);
+            float speedMultiplier = isSprinting ? sprintMultiplier : 1f;
+            float targetSpeed = moveInput * maxMoveSpeed * speedMultiplier;
+
+            float accelRate;
+            if (isGrounded)
+                accelRate = Mathf.Abs(targetSpeed) > 0.01f
+                    ? (isSprinting ? sprintAcceleration : groundAcceleration)
+                    : groundDeceleration;
+            else
+                accelRate = Mathf.Abs(targetSpeed) > 0.01f
+                    ? airAcceleration
+                    : airDeceleration;
 
             rb.linearVelocity = new Vector2(
                 Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accelRate * Time.fixedDeltaTime),
