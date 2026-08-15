@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
@@ -36,6 +37,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private Collider2D col;
+    private Animator anim;
 
     // State Tracking
     private bool isGrounded;
@@ -52,11 +54,20 @@ public class PlayerController : MonoBehaviour
 
     private float defaultGravityScale;
     private float grabCooldownTimer;
+    private int facingDirection = 1; // 1 = right, -1 = left
+    private bool wasGrounded;
+    private float trailTimer;
+
+    public TMP_Text winText;
+
+    [SerializeField] private ParticleSystem trailParticles;
+    public float trailTime;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
+        anim = GetComponent<Animator>();
         defaultGravityScale = rb.gravityScale;
     }
 
@@ -84,7 +95,10 @@ public class PlayerController : MonoBehaviour
 
             // Jump away from the edge
             if (Input.GetKeyDown(KeyCode.Space))
+            {
+                StartEmitting();
                 jumpRequested = true;
+            }
 
             return;
         }
@@ -99,6 +113,15 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayer);
+        wasGrounded = isGrounded;
+
+        // Trail timer: disable emission after 1s
+        if (trailTimer > 0f)
+        {
+            trailTimer -= Time.fixedDeltaTime;
+            if (trailTimer <= 0f)
+                StopEmitting();
+        }
 
         // 2. Handle Hanging State
         if (isHanging)
@@ -109,12 +132,14 @@ public class PlayerController : MonoBehaviour
             if (dropRequested)
             {
                 isHanging = false;
+                anim.SetBool("grab", false);
                 grabCooldownTimer = grabCooldown;
                 dropRequested = false;
             }
             else if (jumpRequested)
             {
                 isHanging = false;
+                anim.SetBool("grab", false);
                 rb.linearVelocity = new Vector2(hangDirection * maxMoveSpeed * 0.5f, edgeClimbJumpForce);
                 jumpRequested = false;
             }
@@ -168,6 +193,12 @@ public class PlayerController : MonoBehaviour
             );
         }
 
+        // Flip the whole GameObject to face movement direction
+        if (moveInput > 0.01f)
+            Flip(1);
+        else if (moveInput < -0.01f)
+            Flip(-1);
+
         // 4. Consume Jump Inputs
         if (jumpRequested && isGrounded)
         {
@@ -203,6 +234,7 @@ public class PlayerController : MonoBehaviour
             {
                 isHanging = true;
                 hangDirection = 1;
+                anim.SetBool("grab", true);
                 return;
             }
         }
@@ -216,6 +248,7 @@ public class PlayerController : MonoBehaviour
             {
                 isHanging = true;
                 hangDirection = -1;
+                anim.SetBool("grab", true);
             }
         }
     }
@@ -226,6 +259,40 @@ public class PlayerController : MonoBehaviour
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
+        }
+    }
+
+    void Flip(int direction)
+    {
+        if (direction != facingDirection)
+        {
+            facingDirection = direction;
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * direction;
+            transform.localScale = scale;
+        }
+    }
+
+    public void StartEmitting()
+    {
+        trailTimer = trailTime;
+        var emissionModule = trailParticles.emission;
+        emissionModule.rateOverTime = 50;
+    }
+
+    // Метод для вимкнення емісії
+    public void StopEmitting()
+    {
+        var emissionModule = trailParticles.emission;
+        emissionModule.rateOverTime = 0;
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("dsa");
+        if (collision.gameObject.layer == 6) {
+            Debug.Log("dasdasdas");
+            winText.gameObject.SetActive(true);
         }
     }
 }
