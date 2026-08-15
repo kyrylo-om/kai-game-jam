@@ -56,6 +56,8 @@ public class GridBuildController : MonoBehaviour
     private PlacedPiece pieceBeingDeleted = null;
     private float currentDeleteTimer = 0f;
 
+    public CameraShake cameraShake;
+
     void Awake()
     {
         // AWAKE runs before START. This fixes the UI reading zeros!
@@ -346,6 +348,7 @@ public class GridBuildController : MonoBehaviour
         previewHideTimer = placementAnimDuration;
         hoverTilemap.ClearAllTiles();
         StartCoroutine(AnimatePiecePlacement(newPiece));
+        cameraShake.Shake();
 
         // If we just placed the last block of this type, auto-cancel placement mode!
         if (currentInventory[(int)currentPieceType] <= 0)

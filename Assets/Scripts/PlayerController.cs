@@ -66,6 +66,7 @@ public class PlayerController : MonoBehaviour
     private bool isJumping;
     private float baseScaleX;
     private Coroutine flipCoroutine;
+    private string currentAnimState;
 
     public GameObject winOverlay;
 
@@ -132,6 +133,7 @@ public class PlayerController : MonoBehaviour
 
         if (!wasGrounded && isGrounded)
         {
+            currentAnimState = "Land";
             anim.CrossFade("Land", 0.1f);
         }
 
@@ -160,6 +162,7 @@ public class PlayerController : MonoBehaviour
                 isHanging = false;
                 rb.linearVelocity = new Vector2(hangDirection * maxMoveSpeed * 0.5f, edgeClimbJumpForce);
                 jumpRequested = false;
+                currentAnimState = "Jump";
                 anim.CrossFade("Jump", 0.1f);
                 TriggerLedgeShake();
             }
@@ -212,6 +215,19 @@ public class PlayerController : MonoBehaviour
                 rb.linearVelocity.y
             );
         }
+        if (isGrounded)
+        {
+            string newState = moveInput != 0f ? "Walk" : "Idle";
+            if (newState != currentAnimState)
+            {
+                currentAnimState = newState;
+                anim.CrossFade(newState, 0.1f);
+            }
+        }
+        else
+        {
+            currentAnimState = null;
+        }
 
         // Flip the whole GameObject to face movement direction
         if (moveInput > 0.01f)
@@ -223,6 +239,7 @@ public class PlayerController : MonoBehaviour
         if (jumpRequested && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            currentAnimState = "Jump";
             anim.CrossFade("Jump", 0.1f);
         }
         jumpRequested = false; // Always consume the request
@@ -255,6 +272,7 @@ public class PlayerController : MonoBehaviour
             {
                 isHanging = true;
                 hangDirection = 1;
+                currentAnimState = "Grab";
                 anim.CrossFade("Grab", 0.1f);
                 return;
             }
@@ -269,6 +287,7 @@ public class PlayerController : MonoBehaviour
             {
                 isHanging = true;
                 hangDirection = -1;
+                currentAnimState = "Grab";
                 anim.CrossFade("Grab", 0.1f);
             }
         }
@@ -338,7 +357,7 @@ public class PlayerController : MonoBehaviour
     {
         trailTimer = trailTime;
         var emissionModule = trailParticles.emission;
-        emissionModule.rateOverTime = 50;
+        emissionModule.rateOverTime = 100;
     }
 
     // Метод для вимкнення емісії

@@ -19,6 +19,7 @@ public class CameraShake : MonoBehaviour
     {
         if (impulseSource != null)
         {
+            Debug.Log("das");
             impulseSource.GenerateImpulse(Vector3.down * shakeAmplitude);
         }
     }
