@@ -288,6 +288,7 @@ public class PlayerController : MonoBehaviour
         if (cameraShake != null)
         {
             cameraShake.Shake();
+            Debug.Log("das");
         }
     }
 
