@@ -4,7 +4,6 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float maxMoveSpeed = 12f;
-    public float sprintMultiplier = 1.5f; // Added for GDD Sprint mechanic
     public float groundAcceleration = 90f;
     public float groundDeceleration = 65f;
     public float airAcceleration = 55f;
