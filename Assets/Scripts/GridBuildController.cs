@@ -116,9 +116,25 @@ public class GridBuildController : MonoBehaviour
     // ==========================================
     private void HandleEditMode(Vector3Int mouseCell, bool isHoveringUI)
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        // 1. Rotation Logic
+        // Rotate forward with 'R' or Right-Click
+        if (Input.GetKeyDown(KeyCode.R) || Input.GetMouseButtonDown(1))
+        {
             currentRotation = (currentRotation + 1) % 4;
+        }
 
+        // Rotate with Mouse Wheel
+        float scroll = Input.mouseScrollDelta.y;
+        if (scroll > 0.01f)
+        {
+            currentRotation = (currentRotation + 1) % 4; // Scroll Up: Forward
+        }
+        else if (scroll < -0.01f)
+        {
+            currentRotation = (currentRotation - 1 + 4) % 4; // Scroll Down: Backward (+4 prevents negative modulo bugs)
+        }
+
+        // 2. Preview & Placement
         if (!isHoveringUI && previewHideTimer <= 0)
         {
             DrawHoverPreview(mouseCell);
