@@ -215,7 +215,7 @@ MonoBehaviour:
   levelTilemap: {fileID: 1942798182}
   blockTile: {fileID: 11400000, guid: 691ff2dfd9f1dd74485e25d868ba7662, type: 2}
   previewTile: {fileID: 11400000, guid: 8450ec9aeed44fe4fa57bb64e7b16ec4, type: 2}
-  deleteParticlePrefab: {fileID: 1472160547}
+  deleteParticlePrefab: {fileID: 3190697064705727830, guid: 03a68a4688b2ab040835ce3834a0853e, type: 3}
   deleteHoldTime: 2
   placementAnimDuration: 0.15
   deleteShakeCurve:
@@ -247,6 +247,9 @@ MonoBehaviour:
   allowedZoneTilemap: {fileID: 0}
   startingInventory: 05000000050000000500000005000000050000000500000005000000
   currentInventory: 00000000000000000000000000000000000000000000000000000000
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
   isEditMode: 0
   currentPieceType: 0
   currentRotation: 0
@@ -946,8 +949,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 325b763c6150dd74d9d35ba338874cc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraShake
+  shakeAmplitude: 0.5
+  shakeFrequency: 2
   shakeDuration: 0.15
-  shakeMagnitude: 0.15
 --- !u!1 &598785488
 GameObject:
   m_ObjectHideFlags: 0

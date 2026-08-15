@@ -41,6 +41,9 @@ public class GridBuildController : MonoBehaviour
     public Action<TetrominoType> OnPieceSelected;
     public Action OnPieceDeselected; // Fired when Esc is pressed or we run out
 
+    [Header("Collision Checks")]
+    public LayerMask playerLayer; // We will set this to the Player layer in Unity!
+
     [Header("State (Read-Only)")]
     public bool isEditMode = false;
     public TetrominoType currentPieceType = TetrominoType.I;
@@ -403,16 +406,35 @@ public class GridBuildController : MonoBehaviour
         {
             if (playableAreaCollider != null)
             {
-                Vector3 cellWorldCenter = mainTilemap.CellToWorld(cellPos) + new Vector3(mainTilemap.cellSize.x / 2f, mainTilemap.cellSize.y / 2f, 0);
-                if (!playableAreaCollider.OverlapPoint(cellWorldCenter)) return true;
+                Vector3 cellCenter = mainTilemap.CellToWorld(cellPos) + new Vector3(mainTilemap.cellSize.x / 2f, mainTilemap.cellSize.y / 2f, 0);
+                if (!playableAreaCollider.OverlapPoint(cellCenter)) return true;
             }
             if (allowedZoneTilemap != null)
             {
                 if (!allowedZoneTilemap.HasTile(cellPos)) return true;
             }
         }
+
         if (gridMap.ContainsKey(cellPos)) return true;
         if (levelTilemap != null && levelTilemap.HasTile(cellPos)) return true;
+
+        // ==========================================
+        // NEW: Check if the player is in this cell
+        // ==========================================
+
+        // Find the exact physical center of the grid cell
+        Vector3 cellWorldCenter = mainTilemap.CellToWorld(cellPos) + new Vector3(mainTilemap.cellSize.x / 2f, mainTilemap.cellSize.y / 2f, 0);
+
+        // Make the check box slightly smaller than the grid cell (0.9f) 
+        // This prevents frustrating bugs where standing near a block's edge blocks placement.
+        Vector2 cellSize = new Vector2(mainTilemap.cellSize.x * 0.9f, mainTilemap.cellSize.y * 0.9f);
+
+        // If the box hits a collider on the player layer, block the placement!
+        if (Physics2D.OverlapBox(cellWorldCenter, cellSize, 0f, playerLayer))
+        {
+            return true;
+        }
+
         return false;
     }
 
