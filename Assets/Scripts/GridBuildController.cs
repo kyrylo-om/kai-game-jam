@@ -348,7 +348,7 @@ public class GridBuildController : MonoBehaviour
         previewHideTimer = placementAnimDuration;
         hoverTilemap.ClearAllTiles();
         StartCoroutine(AnimatePiecePlacement(newPiece));
-        cameraShake.Shake();
+        cameraShake?.Shake();
 
         // If we just placed the last block of this type, auto-cancel placement mode!
         if (currentInventory[(int)currentPieceType] <= 0)
