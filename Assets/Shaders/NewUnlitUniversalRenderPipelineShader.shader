@@ -1,4 +1,4 @@
-Shader "Custom/CinemachineFucker"
+Shader "Custom/NewUnlitUniversalRenderPipelineShader"
 {
     Properties
     {
@@ -8,25 +8,16 @@ Shader "Custom/CinemachineFucker"
 
     SubShader
     {
-        //акуратно з цією фігнею бо без неї альфа просирається
-        Tags { "RenderType" = "Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+
         Pass
         {
-            //акуратно з цією фігнею бо без неї альфа просирається
-            Blend SrcAlpha OneMinusSrcAlpha
-            ZWrite Off
-
-            //шейдер пашоль
             HLSLPROGRAM
 
             #pragma vertex vert
             #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #define DARK_COMMON_LIT_INCLUDED 1
-
-            float4 _MainTex_TexelSize;
-            #include "SDF.hlsl"
 
             struct Attributes
             {
@@ -58,7 +49,7 @@ Shader "Custom/CinemachineFucker"
 
             half4 frag(Varyings IN) : SV_Target
             {
-                half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap,TexturePointSmoothUV(IN.uv)) * _BaseColor;
+                half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor;
                 return color;
             }
             ENDHLSL
