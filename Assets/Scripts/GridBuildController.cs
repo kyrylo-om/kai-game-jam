@@ -111,6 +111,32 @@ public class GridBuildController : MonoBehaviour
         OnPieceDeselected?.Invoke();
     }
 
+    private int GetSupportEdges(Vector3Int cellPos)
+    {
+        int contactCount = 0;
+        Vector3Int[] directions = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+
+        foreach (Vector3Int dir in directions)
+        {
+            Vector3Int neighbor = cellPos + dir;
+
+            // Check against player-placed blocks
+            if (gridMap.ContainsKey(neighbor))
+            {
+                contactCount++;
+                continue; // Skip level check if we already found a block here
+            }
+
+            // Check against level walls/floors
+            if (levelTilemap != null && levelTilemap.HasTile(neighbor))
+            {
+                contactCount++;
+            }
+        }
+
+        return contactCount;
+    }
+
     // ==========================================
     //               EDIT MODE
     // ==========================================
@@ -274,10 +300,23 @@ public class GridBuildController : MonoBehaviour
         Vector3Int centeredPivot = GetCenteredPivot(currentPieceType, currentRotation, mouseCell);
         Vector2Int[] offsets = TetrisData.Shapes[currentPieceType][currentRotation];
 
+        int totalSupportEdges = 0; // NEW: Track total surface area contact
+
+        // First pass: Check blockages and count support
         foreach (Vector2Int offset in offsets)
         {
             Vector3Int checkPos = centeredPivot + new Vector3Int(offset.x, offset.y, 0);
             if (IsCellBlocked(checkPos)) return;
+
+            // Add up every edge that touches a solid surface
+            totalSupportEdges += GetSupportEdges(checkPos);
+        }
+
+        // IMPROVED: Requires at least 2 edges of contact!
+        if (totalSupportEdges < 2)
+        {
+            Debug.Log($"Invalid placement: Only {totalSupportEdges} edges supported. Needs 2!");
+            return;
         }
 
         PlacedPiece newPiece = new PlacedPiece
@@ -383,7 +422,9 @@ public class GridBuildController : MonoBehaviour
 
         Vector3Int centeredPivot = GetCenteredPivot(currentPieceType, currentRotation, mouseCell);
         Vector2Int[] offsets = TetrisData.Shapes[currentPieceType][currentRotation];
+
         bool canPlace = true;
+        int totalSupportEdges = 0;
 
         foreach (Vector2Int offset in offsets)
         {
@@ -391,8 +432,20 @@ public class GridBuildController : MonoBehaviour
 
             if (IsCellBlocked(tilePos)) canPlace = false;
 
-            hoverTilemap.SetTile(tilePos, previewTile);
+            totalSupportEdges += GetSupportEdges(tilePos);
 
+            hoverTilemap.SetTile(tilePos, previewTile);
+        }
+
+        // IMPROVED: Check surface area
+        if (totalSupportEdges < 2)
+        {
+            canPlace = false;
+        }
+
+        foreach (Vector2Int offset in offsets)
+        {
+            Vector3Int tilePos = centeredPivot + new Vector3Int(offset.x, offset.y, 0);
             if (!canPlace) hoverTilemap.SetColor(tilePos, new Color(1, 0, 0, 0.5f));
             else hoverTilemap.SetColor(tilePos, new Color(1, 1, 1, 0.7f));
         }
