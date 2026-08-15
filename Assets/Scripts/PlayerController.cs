@@ -73,6 +73,12 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (trailTimer > 0f)
+        {
+            trailTimer -= Time.fixedDeltaTime;
+            if (trailTimer <= 0f)
+                StopEmitting();
+        }
         // 1. Gather all input in Update
         moveInput = Input.GetAxisRaw("Horizontal");
         isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
