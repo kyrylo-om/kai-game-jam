@@ -215,7 +215,7 @@ MonoBehaviour:
   levelTilemap: {fileID: 1942798182}
   blockTile: {fileID: 11400000, guid: 691ff2dfd9f1dd74485e25d868ba7662, type: 2}
   previewTile: {fileID: 11400000, guid: 8450ec9aeed44fe4fa57bb64e7b16ec4, type: 2}
-  deleteParticlePrefab: {fileID: 1969688058}
+  deleteParticlePrefab: {fileID: 1472160547}
   deleteHoldTime: 2
   placementAnimDuration: 0.15
   deleteShakeCurve:
@@ -267,20 +267,32 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 635785831678625048, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
+      propertyPath: trailTime
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 635785831678625048, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
       propertyPath: winOverlay
       value: 
       objectReference: {fileID: 1613400266}
     - target: {fileID: 635785831678625048, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
+      propertyPath: cameraShake
+      value: 
+      objectReference: {fileID: 519420034}
+    - target: {fileID: 635785831678625048, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
       propertyPath: maxMoveSpeed
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 635785831678625048, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
+      propertyPath: trailParticles
+      value: 
+      objectReference: {fileID: 1472160547}
     - target: {fileID: 635785831678625048, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
       propertyPath: airDeceleration
       value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 635785831678625048, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
       propertyPath: edgeClimbJumpForce
-      value: 7
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 635785831678625048, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
       propertyPath: groundAcceleration
@@ -290,25 +302,17 @@ PrefabInstance:
       propertyPath: groundDeceleration
       value: 45
       objectReference: {fileID: 0}
-    - target: {fileID: 6742402403839107495, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.85
-      objectReference: {fileID: 0}
-    - target: {fileID: 6742402403839107495, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.84
-      objectReference: {fileID: 0}
-    - target: {fileID: 6817364964046178616, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
-      propertyPath: m_Size.x
-      value: 0.20888041
-      objectReference: {fileID: 0}
-    - target: {fileID: 6817364964046178616, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
-      propertyPath: m_Offset.x
-      value: 0.0009152368
-      objectReference: {fileID: 0}
     - target: {fileID: 7507823996745226979, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
       propertyPath: m_LocalScale.x
-      value: 4.15
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7507823996745226979, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2.84
+      objectReference: {fileID: 0}
+    - target: {fileID: 7507823996745226979, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: 7507823996745226979, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
       propertyPath: m_LocalPosition.x
@@ -348,6 +352,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7507823996745226979, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7507823996745226979, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
+      propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9155181778755277075, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
@@ -767,6 +775,7 @@ GameObject:
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
   - component: {fileID: 519420033}
+  - component: {fileID: 519420034}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -924,6 +933,20 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!114 &519420034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 325b763c6150dd74d9d35ba338874cc9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraShake
+  shakeDuration: 0.15
+  shakeMagnitude: 0.15
 --- !u!1 &598785488
 GameObject:
   m_ObjectHideFlags: 0
@@ -999,7 +1022,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ComponentVersion: 2
+  m_ComponentVersion: 3
   m_LightType: 4
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
@@ -2088,6 +2111,11 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!198 &1472160547 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 4579371941579281197, guid: abded6acc09947b4a95b3c6e26178fad, type: 3}
+  m_PrefabInstance: {fileID: 115137437}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1481354671
 GameObject:
   m_ObjectHideFlags: 0
@@ -52176,11 +52204,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1968416581}
   m_CullTransparentMesh: 1
---- !u!198 &1969688058 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 7480997878136821831, guid: 3757021db4fda7e49bf35fbb3e130568, type: 3}
-  m_PrefabInstance: {fileID: 449870283137695519}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1970663809
 GameObject:
   m_ObjectHideFlags: 0
@@ -52560,7 +52583,5 @@ SceneRoots:
   - {fileID: 115137437}
   - {fileID: 1431153771}
   - {fileID: 471578109713448951}
-  - {fileID: 1669618072}
   - {fileID: 832173751}
-  - {fileID: 203586092}
   - {fileID: 1481354673}
