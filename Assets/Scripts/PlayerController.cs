@@ -35,6 +35,12 @@ public class PlayerController : MonoBehaviour
     public float edgeClimbJumpForce = 12f;
     public float grabCooldown = 0.3f;
 
+    [Header("Flip")]
+    public float flipDuration = 0.15f;
+
+    [Header("Camera Shake")]
+    public CameraShake cameraShake;
+
     private Rigidbody2D rb;
     private Collider2D col;
     private Animator anim;
@@ -57,6 +63,9 @@ public class PlayerController : MonoBehaviour
     private int facingDirection = 1; // 1 = right, -1 = left
     private bool wasGrounded;
     private float trailTimer;
+    private bool isJumping;
+    private float baseScaleX;
+    private Coroutine flipCoroutine;
 
     public GameObject winOverlay;
 
@@ -69,10 +78,17 @@ public class PlayerController : MonoBehaviour
         col = GetComponent<Collider2D>();
         anim = GetComponent<Animator>();
         defaultGravityScale = rb.gravityScale;
+        baseScaleX = Mathf.Abs(transform.localScale.x);
     }
 
     void Update()
     {
+        if (trailTimer > 0f)
+        {
+            trailTimer -= Time.fixedDeltaTime;
+            if (trailTimer <= 0f)
+                StopEmitting();
+        }
         // 1. Gather all input in Update
         moveInput = Input.GetAxisRaw("Horizontal");
         isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
@@ -113,7 +129,11 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayer);
-        wasGrounded = isGrounded;
+
+        if (!wasGrounded && isGrounded)
+        {
+            anim.CrossFade("Land", 0.1f);
+        }
 
         // Trail timer: disable emission after 1s
         if (trailTimer > 0f)
@@ -132,16 +152,16 @@ public class PlayerController : MonoBehaviour
             if (dropRequested)
             {
                 isHanging = false;
-                anim.SetBool("grab", false);
                 grabCooldownTimer = grabCooldown;
                 dropRequested = false;
             }
             else if (jumpRequested)
             {
                 isHanging = false;
-                anim.SetBool("grab", false);
                 rb.linearVelocity = new Vector2(hangDirection * maxMoveSpeed * 0.5f, edgeClimbJumpForce);
                 jumpRequested = false;
+                anim.CrossFade("Jump", 0.1f);
+                TriggerLedgeShake();
             }
             return;
         }
@@ -203,6 +223,7 @@ public class PlayerController : MonoBehaviour
         if (jumpRequested && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            anim.CrossFade("Jump", 0.1f);
         }
         jumpRequested = false; // Always consume the request
 
@@ -212,11 +233,11 @@ public class PlayerController : MonoBehaviour
         }
         jumpCanceled = false; // Always consume the cancel
 
-        // --- Better falling feel ---
-        float gravity = rb.linearVelocity.y < 0f
-            ? defaultGravityScale * fallGravityMultiplier
-            : defaultGravityScale;
+        // --- Better falling feel: apply gravity multiplier at all times ---
+        float gravity = defaultGravityScale * fallGravityMultiplier;
         rb.gravityScale = gravity;
+
+        wasGrounded = isGrounded;
     }
 
     void TryEdgeGrab()
@@ -234,7 +255,7 @@ public class PlayerController : MonoBehaviour
             {
                 isHanging = true;
                 hangDirection = 1;
-                anim.SetBool("grab", true);
+                anim.CrossFade("Grab", 0.1f);
                 return;
             }
         }
@@ -248,7 +269,7 @@ public class PlayerController : MonoBehaviour
             {
                 isHanging = true;
                 hangDirection = -1;
-                anim.SetBool("grab", true);
+                anim.CrossFade("Grab", 0.1f);
             }
         }
     }
@@ -262,15 +283,54 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void TriggerLedgeShake()
+    {
+        if (cameraShake != null)
+        {
+            cameraShake.Shake();
+        }
+    }
+
     void Flip(int direction)
     {
         if (direction != facingDirection)
         {
             facingDirection = direction;
-            Vector3 scale = transform.localScale;
-            scale.x = Mathf.Abs(scale.x) * direction;
-            transform.localScale = scale;
+
+            // Stop any in-progress flip animation so we can start a new one
+            // from the current visual scale (not the target)
+            if (flipCoroutine != null)
+                StopCoroutine(flipCoroutine);
+
+            flipCoroutine = StartCoroutine(AnimateFlip(direction));
         }
+    }
+
+    private System.Collections.IEnumerator AnimateFlip(int targetDirection)
+    {
+        float startScaleX = transform.localScale.x;
+        float targetScaleX = baseScaleX * targetDirection;
+        float elapsed = 0f;
+
+        while (elapsed < flipDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / flipDuration;
+            // Smooth step for nicer easing
+            t = t * t * (3f - 2f * t);
+
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Lerp(startScaleX, targetScaleX, t);
+            transform.localScale = scale;
+            yield return null;
+        }
+
+        // Snap to final value
+        Vector3 final = transform.localScale;
+        final.x = targetScaleX;
+        transform.localScale = final;
+
+        flipCoroutine = null;
     }
 
     public void StartEmitting()
