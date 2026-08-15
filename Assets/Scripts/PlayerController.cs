@@ -58,7 +58,7 @@ public class PlayerController : MonoBehaviour
     private bool wasGrounded;
     private float trailTimer;
 
-    public TMP_Text winText;
+    public GameObject winOverlay;
 
     [SerializeField] private ParticleSystem trailParticles;
     public float trailTime;
@@ -292,7 +292,7 @@ public class PlayerController : MonoBehaviour
         Debug.Log("dsa");
         if (collision.gameObject.layer == 6) {
             Debug.Log("dasdasdas");
-            winText.gameObject.SetActive(true);
+            winOverlay.SetActive(true);
         }
     }
 }
