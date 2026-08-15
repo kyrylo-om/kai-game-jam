@@ -205,7 +205,14 @@ public class GridBuildController : MonoBehaviour
             mainTilemap.SetColor(cell, damageColor);
         }
     }
+    // Call this from pickups or level rewards!
+    public void AddToInventory(TetrominoType type, int amount = 1)
+    {
+        currentInventory[(int)type] += amount;
 
+        // This instantly tells our Flexbox UI to redraw the cards and un-hide them!
+        OnInventoryChanged?.Invoke();
+    }
     private void ResetDeleteState()
     {
         if (pieceBeingDeleted != null)
