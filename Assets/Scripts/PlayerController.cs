@@ -10,6 +10,10 @@ public class PlayerController : MonoBehaviour
     public float airAcceleration = 55f;
     public float airDeceleration = 40f;
 
+    [Header("Sprint")]
+    public float sprintMultiplier = 1.5f;
+    public float sprintAcceleration = 120f;
+
     [Header("Jump")]
     public float jumpForce = 15f;
     [Range(0f, 1f)]
@@ -61,7 +65,7 @@ public class PlayerController : MonoBehaviour
     {
         // 1. Gather all input in Update
         moveInput = Input.GetAxisRaw("Horizontal");
-        isSprinting = Input.GetKey(KeyCode.LeftShift);
+        isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         if (grabCooldownTimer > 0f)
             grabCooldownTimer -= Time.deltaTime;
@@ -141,13 +145,23 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // Apply Sprint Multiplier
+            // --- Horizontal acceleration / deceleration via velocity smoothing ---
             float currentMaxSpeed = isSprinting ? maxMoveSpeed * sprintMultiplier : maxMoveSpeed;
             float targetSpeed = moveInput * currentMaxSpeed;
 
-            float accelRate = isGrounded
-                ? (Mathf.Abs(targetSpeed) > 0.01f ? groundAcceleration : groundDeceleration)
-                : (Mathf.Abs(targetSpeed) > 0.01f ? airAcceleration : airDeceleration);
+            float accelRate;
+            if (isGrounded)
+            {
+                // If moving on ground, use sprint accel if sprinting, otherwise normal accel. If stopping, use decel.
+                accelRate = Mathf.Abs(targetSpeed) > 0.01f 
+                    ? (isSprinting ? sprintAcceleration : groundAcceleration) 
+                    : groundDeceleration;
+            }
+            else
+            {
+                // Air physics remain unchanged
+                accelRate = Mathf.Abs(targetSpeed) > 0.01f ? airAcceleration : airDeceleration;
+            }
 
             rb.linearVelocity = new Vector2(
                 Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accelRate * Time.fixedDeltaTime),
