@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: New Material
-  m_Shader: {fileID: 4800000, guid: a6c10c33ffea2dd41bcb871e392dc315, type: 3}
+  m_Shader: {fileID: 4800000, guid: c629f7e5a17d244ec8849beae1c1e603, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -27,6 +27,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -42,21 +46,31 @@ Material:
     m_Ints:
     - _DigitCount: 40
     m_Floats:
+    - PixelSnap: 0
     - _CycleDuration: 1
     - _DriftSpeed: 1.5
     - _EdgeFade: 0.15
     - _EnableExternalAlpha: 0
     - _FlipSpeed: 4
+    - _NoiseSpeed: 15
+    - _PulseSpeed: 15
     - _Scale: 8
     - _Thickness: 0.04
     - _WarpAmp: 0.015
     - _WarpFreq: 15
     - _WarpSpeed: 5
+    - _WobbleAmp: 0.03
+    - _WobbleFreq: 15
+    - _WobbleSpeed: 30
     - _ZWrite: 0
     m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color0: {r: 0.2, g: 0.8, b: 0.2, a: 1}
     - _Color1: {r: 0.5, g: 0.9, b: 0.5, a: 1}
+    - _CoreColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Flip: {r: 1, g: 1, b: 1, a: 1}
+    - _GlowColor: {r: 1, g: 0, b: 0, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
