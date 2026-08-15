@@ -2,8 +2,8 @@ Shader "Custom/NewUnlitUniversalRenderPipelineShader"
 {
     Properties
     {
-        [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
-        [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
+        [MainColor]_BaseColor("Base Color", Color) = (1, 1, 1, 1)
+        [MainTexture]_BaseMap("Base Map", 2D) = "white" {}
     }
 
     SubShader
@@ -35,8 +35,8 @@ Shader "Custom/NewUnlitUniversalRenderPipelineShader"
             SAMPLER(sampler_BaseMap);
 
             CBUFFER_START(UnityPerMaterial)
-                half4 _BaseColor;
-                float4 _BaseMap_ST;
+            half4 _BaseColor;
+            float4 _BaseMap_ST;
             CBUFFER_END
 
             Varyings vert(Attributes IN)

@@ -2,8 +2,8 @@ Shader "Custom/CinemachineFucker"
 {
     Properties
     {
-        [MainColor] _BaseColor("Base Color", Color) = (1, 1, 1, 1)
-        [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
+        [MainColor]_BaseColor("Base Color", Color) = (1, 1, 1, 1)
+        [MainTexture]_BaseMap("Base Map", 2D) = "white" {}
     }
 
     SubShader
@@ -44,8 +44,8 @@ Shader "Custom/CinemachineFucker"
             SAMPLER(sampler_BaseMap);
 
             CBUFFER_START(UnityPerMaterial)
-                half4 _BaseColor;
-                float4 _BaseMap_ST;
+            half4 _BaseColor;
+            float4 _BaseMap_ST;
             CBUFFER_END
 
             Varyings vert(Attributes IN)
@@ -58,7 +58,7 @@ Shader "Custom/CinemachineFucker"
 
             half4 frag(Varyings IN) : SV_Target
             {
-                half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap,TexturePointSmoothUV(IN.uv)) * _BaseColor;
+                half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, TexturePointSmoothUV(IN.uv)) * _BaseColor;
                 return color;
             }
             ENDHLSL

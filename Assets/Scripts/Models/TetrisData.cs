@@ -1,18 +1,18 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-public enum TetrominoType 
-{ 
+public enum TetrominoType
+{
     //палка
-    I, 
+    I,
     //кубик
     O,
     //буква Т
     T,
     // букви Г зеркальні
-    J, L, 
+    J, L,
     //молнії
-    S, 
+    S,
     Z,
 }
 

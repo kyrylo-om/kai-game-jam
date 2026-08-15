@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,7 +32,7 @@ public class GridBuildController : MonoBehaviour
     [Header("Inventory Settings")]
     // Starting amounts for I, J, L, O, S, T, Z
     public int[] startingInventory = new int[7] { 5, 5, 5, 5, 5, 5, 5 };
-    
+
     // The current live inventory
     public int[] currentInventory = new int[7];
 

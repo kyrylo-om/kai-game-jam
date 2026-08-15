@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -9,7 +9,7 @@ public class MainMenuController : MonoBehaviour
     [Header("Level Select Setup")]
     public Transform levelGridContainer;    // Drag your LevelSelectionPanel here
     public GameObject levelButtonPrefab;    // Drag your LevelButtonPrefab here
-    
+
     // In a real game, this might come from a SaveData file or ScriptableObjects
     public List<string> levelNames = new List<string> { "Level 1", "Level 2", "Level 3", "Boss Level" };
 
@@ -21,7 +21,7 @@ public class MainMenuController : MonoBehaviour
     {
         PopulateLevelGrid();
         SetupQualitySettings();
-        
+
         // Bind the exit button
         if (exitButton != null)
             exitButton.onClick.AddListener(ExitGame);
@@ -43,7 +43,7 @@ public class MainMenuController : MonoBehaviour
 
             // Spawn the prefab inside the grid
             GameObject newButtonObj = Instantiate(levelButtonPrefab, levelGridContainer);
-            
+
             // Set the text
             TMP_Text buttonText = newButtonObj.GetComponentInChildren<TMP_Text>();
             if (buttonText != null) buttonText.text = levelName;
@@ -57,12 +57,12 @@ public class MainMenuController : MonoBehaviour
     private void LoadLevel(string sceneName)
     {
         Debug.Log($"Saving selected level: {sceneName}");
-        
+
         // 1. Save the data to our static bridge
         GameSession.SelectedLevelName = sceneName;
 
         // 2. Load the actual gameplay scene
-        SceneManager.LoadScene("SampleScene"); 
+        SceneManager.LoadScene("SampleScene");
     }
 
     private void SetupQualitySettings()
@@ -74,7 +74,7 @@ public class MainMenuController : MonoBehaviour
         // Dynamically pull the quality levels defined in Unity (Project Settings -> Quality)
         string[] qualityNames = QualitySettings.names;
         List<string> options = new List<string>(qualityNames);
-        
+
         qualityDropdown.AddOptions(options);
         qualityDropdown.value = QualitySettings.GetQualityLevel();
         qualityDropdown.RefreshShownValue();
@@ -93,11 +93,11 @@ public class MainMenuController : MonoBehaviour
     {
         Debug.Log("Exiting Game...");
         Application.Quit();
-        
+
         // Note: Application.Quit() doesn't do anything in the Unity Editor, 
         // so we add this line to stop the editor playback when testing.
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        #endif
+#endif
     }
 }

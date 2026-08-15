@@ -61,7 +61,7 @@ float3 hsv_to_rgb(float3 hsv)
 
 float gaussian(float x, float sigma)
 {
-    return exp(-0.5 * (x * x) / (sigma * sigma));
+    return exp( -0.5 * (x * x) / (sigma * sigma));
 }
 
 float3 mod(float3 x, float3 y)
@@ -76,7 +76,7 @@ float rand(float2 n)
 
 float rand(float2 n, float seed)
 {
-    return frac(sin(dot(n, float2(12.9898 * frac(seed), 4.1414 + frac(seed /  42)))) * 43758.5453);
+    return frac(sin(dot(n, float2(12.9898 * frac(seed), 4.1414 + frac(seed / 42)))) * 43758.5453);
 }
 
 float ndot(float2 a, float2 b) {
@@ -101,8 +101,8 @@ float noise(float2 p, float seed = 0) {
     fp = fp * fp * (3.0 - 2.0 * fp);
 
     return lerp(
-    lerp(rand(ip,seed),                rand(ip + float2(1, 0),seed), fp.x),
-    lerp(rand(ip + float2(0, 1),seed), rand(ip + float2(1, 1),seed), fp.x),
+    lerp(rand(ip, seed), rand(ip + float2(1, 0), seed), fp.x),
+    lerp(rand(ip + float2(0, 1), seed), rand(ip + float2(1, 1), seed), fp.x),
     fp.y
     );
 }
@@ -121,7 +121,7 @@ float2 hash2D(float2 p) {
 /////////////////////////////////////
 
 // капсула лол
-float sdCapsule(float2 p, float2 a, float2 b, float r) 
+float sdCapsule(float2 p, float2 a, float2 b, float r)
 {
     float2 pa = p - a, ba = b - a;
     float h = saturate(dot(pa, ba) / dot(ba, ba)); // saturate замість clamp(..., 0, 1) в HLSL
@@ -129,26 +129,26 @@ float sdCapsule(float2 p, float2 a, float2 b, float r)
 }
 
 // круглий ящік
-float sdRoundedBox(float2 p, float2 b, float r) 
+float sdRoundedBox(float2 p, float2 b, float r)
 {
     float2 d = abs(p) - b + r;
     return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
 }
 
 // цифірка нолік
-float sdfZero(float2 p, float thick) 
-{ 
-    return abs(sdRoundedBox(p, float2(0.12, 0.25), 0.08)) - thick; 
+float sdfZero(float2 p, float thick)
+{
+    return abs(sdRoundedBox(p, float2(0.12, 0.25), 0.08)) - thick;
 }
 
 // цифірка один
-float sdfOne(float2 p, float thick) 
+float sdfOne(float2 p, float thick)
 {
-    p.x += 0.02; 
+    p.x += 0.02;
     return min(min(
-        sdCapsule(p, float2(0.0,-0.25), float2(0.0,0.25), thick), 
-        sdCapsule(p, float2(0.0,0.25), float2(-0.12,0.15), thick)), 
-        sdCapsule(p, float2(-0.12,-0.25), float2(0.12,-0.25), thick));
+    sdCapsule(p, float2(0.0, -0.25), float2(0.0, 0.25), thick),
+    sdCapsule(p, float2(0.0, 0.25), float2( -0.12, 0.15), thick)),
+    sdCapsule(p, float2( -0.12, -0.25), float2(0.12, -0.25), thick));
 }
 
 // https://iquilezles.org/articles/distfunctions2d/
@@ -168,7 +168,7 @@ float sdCircle(float2 p, float r)
 float sdRhombus(float2 p, in float2 b)
 {
     p = abs(p);
-    float h = clamp(ndot(b - 2.0 * p, b) / dot(b, b), - 1.0, 1.0);
+    float h = clamp(ndot(b - 2.0 * p, b) / dot(b, b), -1.0, 1.0);
     float d = length(p - 0.5 * b * float2(1.0 - h, 1.0 + h));
     return d * sign(p.x * b.y + p.y * b.x - b.x * b.y);
 }

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(ParticleSystem))]
 public class ShroudRoomFiller : MonoBehaviour
@@ -6,7 +6,7 @@ public class ShroudRoomFiller : MonoBehaviour
     [Header("Growth Settings")]
     public float targetHeight = 10f;
     public float timeToFill = 15f;
-    
+
     [Header("Density")]
     public float particlesPerCubicMeter = 5f;
 
@@ -14,13 +14,13 @@ public class ShroudRoomFiller : MonoBehaviour
     public Transform player;             // Drag your player here
     public float playerHeadOffset = 1.8f; // How high is the player's head/camera from their feet?
     public float maxSubmergedTime = 5f;   // How many seconds before they die?
-    
+
     private float currentChokeTimer = 0f;
 
     private ParticleSystem ps;
     private ParticleSystem.ShapeModule shape;
     private ParticleSystem.EmissionModule emission;
-    
+
     private float currentHeight = 0.1f;
     private float boxWidth;
     private float boxDepth;
@@ -53,7 +53,7 @@ public class ShroudRoomFiller : MonoBehaviour
             shape.scale = newScale;
 
             Vector3 newPos = shape.position;
-            newPos.z = currentHeight / 2f; 
+            newPos.z = currentHeight / 2f;
             shape.position = newPos;
 
             float currentVolume = boxWidth * currentHeight * boxDepth;
@@ -77,7 +77,7 @@ public class ShroudRoomFiller : MonoBehaviour
         {
             // Player is drowning in the binary shroud!
             currentChokeTimer += Time.deltaTime;
-            
+
             // Optional: Print a warning so you can test it
             Debug.Log($"Submerged! Time until death: {maxSubmergedTime - currentChokeTimer:F1}s");
 
@@ -100,13 +100,18 @@ public class ShroudRoomFiller : MonoBehaviour
 
     private void KillPlayer()
     {
-        Debug.Log("PLAYER HAS DIED FROM BINARY GAS!");
-        // Hook into your game designer's actual death/respawn script here!
-        
-        // Example: player.GetComponent<HealthController>().Die();
-        
-        // Reset timer so it doesn't spam the console
-        currentChokeTimer = 0f; 
+        // Prevent calling this multiple times per frame
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.TriggerGameOver();
+        }
+        else
+        {
+            Debug.LogError("GameManager is missing from the scene!");
+        }
+
+        // Disable this script so the gas stops rising while the death screen fades in
+        this.enabled = false;
     }
 
     private void OnDrawGizmos()

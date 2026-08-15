@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.EventSystems; // Required for UI checking
 
@@ -13,7 +13,7 @@ public class TilemapClicker : MonoBehaviour
     void Start()
     {
         // Cache the main camera for performance
-        mainCam = Camera.main; 
+        mainCam = Camera.main;
     }
 
     void Update()
@@ -59,7 +59,7 @@ public class TilemapClicker : MonoBehaviour
 
         // --- EXAMPLE C: Delete a tile ---
         // myTilemap.SetTile(gridCoords, null);
-        
+
         // --- EXAMPLE D: Change the color of the clicked tile ---
         // myTilemap.SetTileFlags(gridCoords, TileFlags.None); // Must unlock flags to change color
         // myTilemap.SetColor(gridCoords, Color.red);
