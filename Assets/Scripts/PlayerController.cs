@@ -1,10 +1,10 @@
-
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float maxMoveSpeed = 12f;
+    public float sprintMultiplier = 1.5f; // Added for GDD Sprint mechanic
     public float groundAcceleration = 90f;
     public float groundDeceleration = 65f;
     public float airAcceleration = 55f;
@@ -33,11 +33,20 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private Collider2D col;
+
+    // State Tracking
     private bool isGrounded;
     private bool isWallSliding;
     private bool isHanging;
-    private int hangDirection; // 1 = right wall, -1 = left wall
+    private int hangDirection;
+
+    // Input Caching (Fixes missed inputs in FixedUpdate)
     private float moveInput;
+    private bool isSprinting;
+    private bool jumpRequested;
+    private bool jumpCanceled;
+    private bool dropRequested;
+
     private float defaultGravityScale;
     private float grabCooldownTimer;
 
@@ -50,53 +59,62 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // 1. Gather all input in Update
         moveInput = Input.GetAxisRaw("Horizontal");
+        isSprinting = Input.GetKey(KeyCode.LeftShift);
 
-        // Tick grab cooldown
         if (grabCooldownTimer > 0f)
             grabCooldownTimer -= Time.deltaTime;
 
         if (isHanging)
         {
-            // Release hang only when pressing S (down)
-            if (Input.GetKeyDown(KeyCode.S))
+            // Drop down with S
+            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+                dropRequested = true;
+
+            // NEW: Pull away from the wall to drop (A or D)
+            // If hanging on right wall (1) and moving left (< 0), OR hanging on left wall (-1) and moving right (> 0)
+            if ((hangDirection == 1 && moveInput < -0.1f) || (hangDirection == -1 && moveInput > 0.1f))
             {
-                isHanging = false;
-                grabCooldownTimer = grabCooldown;
-                return;
+                dropRequested = true;
             }
 
-            // Jump from edge
+            // Jump away from the edge
             if (Input.GetKeyDown(KeyCode.Space))
-            {
-                isHanging = false;
-                rb.linearVelocity = new Vector2(hangDirection * maxMoveSpeed * 0.5f, edgeClimbJumpForce);
-                return;
-            }
+                jumpRequested = true;
 
-            return; // No other input while hanging
+            return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-        }
+        if (Input.GetKeyDown(KeyCode.Space))
+            jumpRequested = true;
 
-        // Variable jump height — cut velocity short when releasing jump early
-        if (Input.GetKeyUp(KeyCode.Space) && rb.linearVelocity.y > 0f)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
-        }
+        if (Input.GetKeyUp(KeyCode.Space))
+            jumpCanceled = true;
     }
 
     void FixedUpdate()
     {
         isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayer);
 
+        // 2. Handle Hanging State
         if (isHanging)
         {
             rb.linearVelocity = Vector2.zero;
             rb.gravityScale = 0f;
+
+            if (dropRequested)
+            {
+                isHanging = false;
+                grabCooldownTimer = grabCooldown;
+                dropRequested = false;
+            }
+            else if (jumpRequested)
+            {
+                isHanging = false;
+                rb.linearVelocity = new Vector2(hangDirection * maxMoveSpeed * 0.5f, edgeClimbJumpForce);
+                jumpRequested = false;
+            }
             return;
         }
 
@@ -110,27 +128,23 @@ public class PlayerController : MonoBehaviour
 
         isWallSliding = !isGrounded && pressingIntoWall;
 
-        // --- Edge detection (only when falling and not on cooldown) ---
+        // --- Edge detection ---
         if (!isGrounded && rb.linearVelocity.y < 0f && grabCooldownTimer <= 0f)
             TryEdgeGrab();
 
+        // 3. Process Physics Movement
         if (isWallSliding)
         {
-            // Stick to wall horizontally
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-
-            // Accelerate downward while sliding, preserve upward momentum
-            float targetSlideY = -maxWallSlideSpeed;
-            if (rb.linearVelocity.y > 0f)
-                targetSlideY = rb.linearVelocity.y;
-
-            rb.linearVelocity = new Vector2(0f,
-                Mathf.MoveTowards(rb.linearVelocity.y, targetSlideY, wallSlideAcceleration * Time.fixedDeltaTime));
+            float targetSlideY = rb.linearVelocity.y > 0f ? rb.linearVelocity.y : -maxWallSlideSpeed;
+            rb.linearVelocity = new Vector2(0f, Mathf.MoveTowards(rb.linearVelocity.y, targetSlideY, wallSlideAcceleration * Time.fixedDeltaTime));
         }
         else
         {
-            // --- Horizontal acceleration / deceleration via velocity smoothing ---
-            float targetSpeed = moveInput * maxMoveSpeed;
+            // Apply Sprint Multiplier
+            float currentMaxSpeed = isSprinting ? maxMoveSpeed * sprintMultiplier : maxMoveSpeed;
+            float targetSpeed = moveInput * currentMaxSpeed;
+
             float accelRate = isGrounded
                 ? (Mathf.Abs(targetSpeed) > 0.01f ? groundAcceleration : groundDeceleration)
                 : (Mathf.Abs(targetSpeed) > 0.01f ? airAcceleration : airDeceleration);
@@ -140,6 +154,19 @@ public class PlayerController : MonoBehaviour
                 rb.linearVelocity.y
             );
         }
+
+        // 4. Consume Jump Inputs
+        if (jumpRequested && isGrounded)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        }
+        jumpRequested = false; // Always consume the request
+
+        if (jumpCanceled && rb.linearVelocity.y > 0f)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
+        }
+        jumpCanceled = false; // Always consume the cancel
 
         // --- Better falling feel ---
         float gravity = rb.linearVelocity.y < 0f
@@ -154,14 +181,12 @@ public class PlayerController : MonoBehaviour
         float midY = bounds.center.y;
         float topY = bounds.max.y + 0.05f;
 
-        // Check right side (always, no input required)
+        // Check right side
         {
             Vector2 wallOrigin = new Vector2(bounds.max.x, midY);
             Vector2 gapOrigin = new Vector2(bounds.max.x, topY);
-            bool wallHit = Physics2D.Raycast(wallOrigin, Vector2.right, edgeCheckDistance, groundLayer);
-            bool gapClear = !Physics2D.Raycast(gapOrigin, Vector2.right, edgeCheckDistance, groundLayer);
-
-            if (wallHit && gapClear)
+            if (Physics2D.Raycast(wallOrigin, Vector2.right, edgeCheckDistance, groundLayer) &&
+               !Physics2D.Raycast(gapOrigin, Vector2.right, edgeCheckDistance, groundLayer))
             {
                 isHanging = true;
                 hangDirection = 1;
@@ -169,14 +194,12 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Check left side (always, no input required)
+        // Check left side
         {
             Vector2 wallOrigin = new Vector2(bounds.min.x, midY);
             Vector2 gapOrigin = new Vector2(bounds.min.x, topY);
-            bool wallHit = Physics2D.Raycast(wallOrigin, Vector2.left, edgeCheckDistance, groundLayer);
-            bool gapClear = !Physics2D.Raycast(gapOrigin, Vector2.left, edgeCheckDistance, groundLayer);
-
-            if (wallHit && gapClear)
+            if (Physics2D.Raycast(wallOrigin, Vector2.left, edgeCheckDistance, groundLayer) &&
+               !Physics2D.Raycast(gapOrigin, Vector2.left, edgeCheckDistance, groundLayer))
             {
                 isHanging = true;
                 hangDirection = -1;
